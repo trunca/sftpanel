@@ -21,8 +21,6 @@ from Components.Harddisk import harddiskmanager
 from os import environ
 import os
 import gettext
-import emuman
-import minstall
 import tools
 from enigma import eEPGCache
 from types import *
@@ -45,7 +43,7 @@ lang = language.getLanguage()
 environ["LANGUAGE"] = lang[:2]
 gettext.bindtextdomain("enigma2", resolveFilename(SCOPE_LANGUAGE))
 gettext.textdomain("enigma2")
-gettext.bindtextdomain("sftpanel", "%s%s" % (resolveFilename(SCOPE_PLUGINS), "Extensions/sftpanel/locale/"))
+gettext.bindtextdomain("sftpanel", "%s%s" % (resolveFilename(SCOPE_PLUGINS), "sftpanel/locale/"))
 
 def _(txt):
 	t = gettext.dgettext("sftpanel", txt)
@@ -70,43 +68,17 @@ def logging(line):
 
 #now = time.localtime(time.time())
 ######################################################################################
-config.plugins.sftpanel.showmain = ConfigYesNo(default = True)
-config.plugins.sftpanel.showsftpanelmenu = ConfigYesNo(default = True)
-config.plugins.sftpanel.showextsoft = ConfigYesNo(default = True)
-config.plugins.sftpanel.showclviewer = ConfigYesNo(default = False)
-config.plugins.sftpanel.showscriptex = ConfigYesNo(default = False)
-config.plugins.sftpanel.showusbunmt = ConfigYesNo(default = False)
-config.plugins.sftpanel.showsetupipk = ConfigYesNo(default = True)
-config.plugins.sftpanel.showdrop = ConfigYesNo(default = False)
 config.plugins.sftpanel.filtername = ConfigYesNo(default = False)
-config.plugins.sftpanel.showepgdwnload = ConfigYesNo(default = False)
-#config.plugins.sftpanel.coldstartepgrstore = ConfigYesNo(default = False)
-config.plugins.sftpanel.showsinfo = ConfigYesNo(default = False)
 config.plugins.sftpanel.currentclock = ConfigClock(default = 0)
 config.plugins.sftpanel.multifilemode = ConfigSelection(default = "Multi", choices = [
 		("Multi", _("Multi files")),
 		("Single", _("Single file")),
 ])
-config.plugins.sftpanel.crashpath = ConfigSelection(default = '/home/root/crashlogs/', choices = [
-		('/home/root/crashlogs/', _('/home/root/crashlogs')),
-		('/media/hdd/', _('/media/hdd')),
-		('/home/root/', _('/home/root')),
-		('/home/root/logs/', _('/home/root/logs')),
-		('/media/hdd/logs/', _('/media/hdd/logs')),
-		('/tmp/', _('/tmp')),
-])
 config.plugins.sftpanel.userdir = ConfigText(default="/ipk/", visible_width = 70, fixed_size = False)
 ######################################################################################
-def IsImageName():
-	if fileExists("/etc/issue"):
-		for line in open("/etc/issue"):
-			if "BlackHole" in line or "vuplus" in line:
-				return True
-	return False
-######################################################################################
-class easyPanel2(Screen):
+class extrapanel(Screen):
 	skin = """
-<screen name="easyPanel2" position="center,225" size="1300,720" title="sft-panel">
+<screen name="extrapanel" position="center,225" size="1300,720" title="Extra Panel">
 <ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
 <ePixmap pixmap="MX_HQ7/menu/mainnsft.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
 <ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
@@ -148,7 +120,6 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 			"cancel": self.exit,
 			"back": self.exit,
 			"red": self.exit,
-			"info": self.infoKey,
 			"green": self.keyGreen,
 			"yellow": self.keyYellow,
 			"blue": self.keyBlue,
@@ -160,31 +131,30 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 			"6": self.go,
 			"7": self.go,
 		})
-		self["key_green"] = StaticText(_("Softcam"))
-		self["key_yellow"] = StaticText(_("Tools"))
-		self["key_blue"] = StaticText(_("Install"))
+		self["key_green"] = StaticText(_("Informacion"))
+		self["key_yellow"] = StaticText(_("Utilidades"))
+		self["key_blue"] = StaticText(_("Instalar"))
+		self["key_red"] = StaticText(_("Cerrar"))
 		self.list = []
 		self["menu"] = List(self.list)
 		self.mList()
 
 	def mList(self):
 		self.list = []
-		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/softcam.png"))
-		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/tools.png"))
-		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/install.png"))
-		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/epp2.png"))
-		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/system.png"))
-		sevenpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/addon.png"))
-		eightpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/system2.png"))
-		sietepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/multimediapanel.png"))
-		self.list.append((_("Service Cam"), 1, _("Start, Stop, Restart Sofcam/Cardserver"), onepng))
-		self.list.append((_("Service Tools"), 2, _("Manage epg, ntp, unmount, script, info ..."), twopng ))
-		self.list.append((_("System Tools"), 3, _("kernel modules manager, manage swap, ftp, samba, unmount USB"), sixpng ))
-		self.list.append((_("User Tools"), 4, _("cache flush, DDNS sync"), eightpng ))
-		self.list.append((_("Manual Installer/Uninstaller"), 5, _("install/uninstall local .ipk & .tar.gz files from /tmp"), treepng))
-		self.list.append((_("Plugin Browser"), 6, _("Install & Remove Plugins, Addons, Softcams"), sevenpng))
-		self.list.append((_("Multimedia"), 7, _("Multimedia"), sietepng))
-		self.list.append((_("sft-panel Config"), 8, _("config menu and extentionsmenu for sft-panel items"), fourpng))
+		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/tools.png"))
+		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/install.png"))
+		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/epp2.png"))
+		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/system.png"))
+		sevenpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/addon.png"))
+		eightpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/system2.png"))
+		sietepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/multimediapanel.png"))
+		self.list.append((_("Utilidades de Servicio"), 2, _("Gestion EPG, NTP, ejecucion script...."), twopng ))
+		self.list.append((_("Utilidades de Sistema"), 3, _("Gestion modulos Kernel, memoria swpa, Samba, utilidades usb"), sixpng ))
+		self.list.append((_("Utilidades de Usuario"), 4, _("Liberador memoria, gestion cuenta Dns, utilidades password"), eightpng ))
+		self.list.append((_("Instalar Paquetes"), 5, _("Gestion de instalacion de paquetes"), treepng))
+		self.list.append((_("Acceso a Plugin"), 6, _("Gestion de plugins, instalacion y desistalacion"), sevenpng))
+		self.list.append((_("Multimedia"), 7, _("Utilidades multimedia, streaming..."), sietepng))
+		self.list.append((_("Panel Configuracion"), 8, _("Configuracion opciones Panel"), fourpng))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
 		self["menu"].setList(self.list)
@@ -206,16 +176,15 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def select_item(self, item):
 		if item:
-			if item is 1:
-				self.session.open(emuman.SoftcamPanel2)
-			elif item is 2:
+			if item is 2:				
 				self.session.open(tools.ToolsScreen2)
 			elif item is 3:
 				self.session.open(tools.SystemScreen)
 			elif item is 4:
 				self.session.open(tools.System2Screen)
 			elif item is 5:
-				self.session.open(minstall.IPKToolsScreen2)
+				from Plugins.Extensions.MediaScanner.plugin import main
+				main(self.session)
 			elif item is 6:
 				self.session.open(PluginBrowser)
 			elif item is 7:
@@ -229,21 +198,21 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 		self.close()
 
 	def keyBlue (self):
-		self.session.open(minstall.IPKToolsScreen2)
+		from Plugins.Extensions.MediaScanner.plugin import main
+		main(self.session)
 				
 	def keyYellow (self):
 		self.session.open(tools.ToolsScreen2)
 		
 	def keyGreen (self):
-		self.session.open(emuman.emuSel5)
-	
-	def infoKey (self):
 		self.session.open(sftpanelinfo)
+	
+	
 ######################################################################################
 class sftpanelinfo(Screen):
 	skin = """
 <screen name="sftpanelinfo" position="340,74" size="620,617" title="sft-panel">
-	<ePixmap position="20,612" zPosition="1" size="180,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,612" zPosition="1" size="180,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="CPULabel" render="Label" position="20,29" zPosition="2" size="180,22" font="Regular;20" halign="right" valign="center" backgroundColor="background" foregroundColor="#aaaaaa" transparent="1" />
 	<widget source="CPU" render="Label" position="210,29" zPosition="2" size="390,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_red" render="Label" position="20,582" zPosition="2" size="180,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
@@ -280,7 +249,7 @@ class sftpanelinfo(Screen):
 	<eLabel position="30,443" size="560,2" backgroundColor="#aaaaaa" />
 	<eLabel position="30,523" size="560,2" backgroundColor="#aaaaaa" />
 	<eLabel position="230,558" size="320,2" backgroundColor="#aaaaaa" />
-	<ePixmap position="20,531" size="180,47" zPosition="1" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/sfpanelinfo.png" alphatest="blend" />
+	<ePixmap position="20,531" size="180,47" zPosition="1" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/sfpanelinfo.png" alphatest="blend" />
 	<widget source="panelver" render="Label" position="490,531" zPosition="2" size="100,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="plipanel" render="Label" position="235,531" zPosition="2" size="250,22" font="Regular;20" halign="right" valign="center" backgroundColor="background" foregroundColor="#aaaaaa" transparent="1" />
 	<widget source="cardserver" render="Label" position="370,590" zPosition="2" size="225,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
@@ -660,21 +629,10 @@ class ConfigExtentions2(ConfigListScreen, Screen):
 		Screen.__init__(self, session)
 		self.setTitle(_("sft-panel Menu/Extensionmenu config"))
 		self.list = []
-		self.list.append(getConfigListEntry(_("Show sft-panel in MainMenu"), config.plugins.sftpanel.showmain))
-		self.list.append(getConfigListEntry(_("Show sft-panel in ExtensionMenu"), config.plugins.sftpanel.showsftpanelmenu))
-		self.list.append(getConfigListEntry(_("Show E-SoftCam manager in ExtensionMenu"), config.plugins.sftpanel.showextsoft))
-		self.list.append(getConfigListEntry(_("Show E-CrashLog viewr in ExtensionMenu"), config.plugins.sftpanel.showclviewer))
-		self.list.append(getConfigListEntry(_("Show E-Script Executter in ExtensionMenu"), config.plugins.sftpanel.showscriptex))
-		self.list.append(getConfigListEntry(_("Show E-Usb Unmount in ExtensionMenu"), config.plugins.sftpanel.showusbunmt))
-		self.list.append(getConfigListEntry(_("Show E-Installer in ExtensionMenu"), config.plugins.sftpanel.showsetupipk))
-		self.list.append(getConfigListEntry(_("Show E-Flash Cache in ExtensionMenu"), config.plugins.sftpanel.showdrop))
-		self.list.append(getConfigListEntry(_("Show E-Info in ExtensionMenu"), config.plugins.sftpanel.showsinfo))
-		self.list.append(getConfigListEntry(_("Show E-EPG Downloader in ExtensionMenu"), config.plugins.sftpanel.showepgdwnload))
-		self.list.append(getConfigListEntry(_("E-Installer: User directory on mount device"), config.plugins.sftpanel.userdir))
-		self.list.append(getConfigListEntry(_("E-Installer: Selection mode"), config.plugins.sftpanel.multifilemode))
-		self.list.append(getConfigListEntry(_("Filter by Name in download extentions"), config.plugins.sftpanel.filtername))
-		self.list.append(getConfigListEntry(_("Crashlog viewer path"), config.plugins.sftpanel.crashpath))
-		self.list.append(getConfigListEntry(_("E-script path"), config.plugins.sftpanel.scriptpath))
+		self.list.append(getConfigListEntry(_("Directorio Montaje"), config.plugins.sftpanel.userdir))
+		self.list.append(getConfigListEntry(_("Seccion modo instalacion paquete"), config.plugins.sftpanel.multifilemode))
+		self.list.append(getConfigListEntry(_("Filtrar nombre en descarga"), config.plugins.sftpanel.filtername))
+		self.list.append(getConfigListEntry(_("Directorio script"), config.plugins.sftpanel.scriptpath))
 		ConfigListScreen.__init__(self, self.list)
 		self["key_red"] = StaticText(_("Close"))
 		self["key_green"] = StaticText(_("Save"))
@@ -695,9 +653,6 @@ class ConfigExtentions2(ConfigListScreen, Screen):
 			i[1].save()
 		configfile.save()
 		self.mbox = self.session.open(MessageBox,(_("configuration is saved")), MessageBox.TYPE_INFO, timeout = 4 )
-		if not IsImageName():
-			from Components.PluginComponent import plugins
-			plugins.reloadPlugins()
 ######################################################################################
 class loadEPG():
 	def __init__(self):
@@ -798,103 +753,15 @@ def sessionstart(reason,session=None, **kwargs):
 		pEmu.gotSession(session)
 ######################################################################################
 def main(session, **kwargs):
-	session.open(easyPanel2)
+	session.open(extrapanel)
 
 def menu(menuid, **kwargs):
 	if menuid == "mainmenu":
 		return [(_("sft-panel"), main, _("sft-panel_"), 48)]
 	return []
 
-def extsoft(session, **kwargs):
-	session.open(emuman.emuSel5)
-	
-def einfo(session, **kwargs):
-	session.open(sftpanelinfo)
-	
-def clviewer(session, **kwargs):
-	session.open(tools.CrashLogScreen)
-	
-def scriptex(session, **kwargs):
-	session.open(tools.ScriptScreen3)
-	
-def epgreload(session, **kwargs):
-	session.open(tools.epgdmanual)
-	
-def epgdwnload(session, **kwargs):
-	session.open(tools.epgdna)
-
-def usbunmt(session, **kwargs):
-	session.open(tools.UsbScreen)
-	
-def extdrop(session, **kwargs):
-	session.open(tools.DropScreen)
-	
-def setupipk(session, **kwargs):
-	session.open(minstall.InstallAll4)
-	
-def mgcamd_sw(session, **kwargs):
-	config.plugins.usw.activeconf.value = config.plugins.uswmgcamd.activeconf.value
-	config.plugins.usw.configpath.value = config.plugins.uswmgcamd.configpath.value
-	config.plugins.usw.emu.value = "Mgcamd"
-	config.plugins.usw.configfile.value = config.plugins.uswmgcamd.configfile.value
-	config.plugins.usw.configext.value = config.plugins.uswmgcamd.configext.value
-	session.open(emuman.uniswitcher)
-	
-def wicardd_sw(session, **kwargs):
-	config.plugins.usw.activeconf.value = config.plugins.uswwicardd.activeconf.value
-	config.plugins.usw.configpath.value = config.plugins.uswwicardd.configpath.value
-	config.plugins.usw.emu.value = "Wicardd"
-	config.plugins.usw.configfile.value = config.plugins.uswwicardd.configfile.value
-	config.plugins.usw.configext.value = config.plugins.uswwicardd.configext.value
-	session.open(emuman.uniswitcher)
-	
-def oscam_sw(session, **kwargs):
-	config.plugins.usw.activeconf.value = config.plugins.uswoscam.activeconf.value
-	config.plugins.usw.configpath.value = config.plugins.uswoscam.configpath.value
-	config.plugins.usw.emu.value = "Oscam"
-	config.plugins.usw.configfile.value = config.plugins.uswoscam.configfile.value
-	config.plugins.usw.configext.value = config.plugins.uswoscam.configext.value
-	session.open(emuman.uniswitcher)
-	
-def cccam_sw(session, **kwargs):
-	config.plugins.usw.activeconf.value = config.plugins.uswcccam.activeconf.value
-	config.plugins.usw.configpath.value = config.plugins.uswcccam.configpath.value
-	config.plugins.usw.emu.value = "CCcam"
-	config.plugins.usw.configfile.value = config.plugins.uswcccam.configfile.value
-	config.plugins.usw.configext.value = config.plugins.uswcccam.configext.value
-	session.open(emuman.uniswitcher)
-	
 def Plugins(**kwargs):
-	list = [PluginDescriptor(name=_("sft-panel"), description=_("Utilidades imagen Sfteam"), where = [PluginDescriptor.WHERE_PLUGINMENU], icon="sfpanel.png", fnc=main)]
-	if config.plugins.sftpanel.showsftpanelmenu.value:
-		list.append(PluginDescriptor(name=_("sft-panel"), description=_("set of utilities for enigma2"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=main))
-	if config.plugins.sftpanel.showextsoft.value:
-		list.append(PluginDescriptor(name=_("E-SoftCam manager"), description=_("Start, Stop, Restart Sofcam/Cardserver"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=extsoft))
-	if config.plugins.sftpanel.showdrop.value:
-		list.append(PluginDescriptor(name=_("E-Flush cache"), description=_("drop system cache"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=extdrop))
-	if config.plugins.uswmgcamd.active.value:
-		list.append(PluginDescriptor(name=_("E-Newcamd.list switcher"), description=_("Switch newcamd.list with remote conrol"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=mgcamd_sw))
-	if config.plugins.uswwicardd.active.value:
-		list.append(PluginDescriptor(name=_("E-Wicardd.conf switcher"), description=_("Switch wicardd.conf with remote conrol"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=wicardd_sw))
-	if config.plugins.sftpanel.showclviewer.value:
-		list.append(PluginDescriptor(name=_("E-Crashlog viewer"), description=_("Switch newcamd.list with remote conrol"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=clviewer))
-	if config.plugins.sftpanel.showscriptex.value:
-		list.append(PluginDescriptor(name=_("E-Script Executer"), description=_("Start scripts from /usr/script"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=scriptex))
-	if config.plugins.sftpanel.showepgdwnload.value:
-		list.append(PluginDescriptor(name=_("E-EPG Downloader"), description=_("EPG Downloader"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=epgdwnload))
-	if config.plugins.sftpanel.showsinfo.value:
-		list.append(PluginDescriptor(name=_("E-Info"), description=_("E-Info"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=einfo))
-	if config.plugins.sftpanel.showusbunmt.value:
-		list.append(PluginDescriptor(name=_("E-Unmount USB"), description=_("Unmount usb devices"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=usbunmt))
-	if config.plugins.sftpanel.showsetupipk.value:
-		list.append(PluginDescriptor(name=_("E-Installer"), description=_("install & forced install ipk, bh.tgz, tar.gz, nab.tgz from /tmp"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=setupipk))
-	if config.plugins.sftpanel.showmain.value:
-		list.append(PluginDescriptor(name=_("sft-panel"), description=_("sft-panel"), where = [PluginDescriptor.WHERE_MENU], fnc=menu))
-	if config.plugins.uswoscam.active.value:
-		list.append(PluginDescriptor(name= _("E-Oscam.conf switcher"), description= _("Switch oscam condig with remote control"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=oscam_sw))
-	if config.plugins.uswcccam.active.value:
-		list.append(PluginDescriptor(name= _("E-CCcam.Cfg switcher"), description= _("Switch cccam condig with remote control"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=cccam_sw))
-	list.append(PluginDescriptor(name=_("sft-panel"), description=_("sft-panel"), where = [PluginDescriptor.WHERE_AUTOSTART, PluginDescriptor.WHERE_SESSIONSTART], fnc = sessionstart))
+	list = [PluginDescriptor(name=_("Panel SFTeam"), description=_("Utilidades imagen Sfteam"), where = [PluginDescriptor.WHERE_EXTENSIONSMENU], fnc=main)]
 	return list
 
 

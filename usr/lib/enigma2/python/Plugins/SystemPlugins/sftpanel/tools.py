@@ -19,7 +19,7 @@ from Components.ActionMap import ActionMap, NumberActionMap
 from Plugins.Plugin import PluginDescriptor
 from Components.Language import language
 from Components.ScrollLabel import ScrollLabel
-from Tools.Directories import fileExists, pathExists, resolveFilename, SCOPE_PLUGINS, SCOPE_LANGUAGE
+from Tools.Directories import fileExists, pathExists, resolveFilename, SCOPE_PLUGINS, SCOPE_LANGUAGE, SCOPE_CURRENT_PLUGIN, SCOPE_CURRENT_SKIN
 from time import *
 from enigma import eEPGCache
 from types import *
@@ -52,6 +52,26 @@ def _(txt):
 	if t == txt:
 		t = gettext.gettext(txt)
 	return t
+
+def command(comandline, strip=1):
+	comandline = comandline + " >/tmp/command.txt"
+	os.system(comandline)
+	text = ""
+	if os.path.exists("/tmp/command.txt") is True:
+		file = open("/tmp/command.txt", "r")
+		if strip == 1:
+			for line in file:
+				text = text + line.strip() + '\n'
+		else:
+			for line in file:
+				text = text + line
+				if text[-1:] != '\n': text = text + "\n"
+		file.close()
+	# if one or last line then remove linefeed
+	if text[-1:] == '\n': text = text[:-1]
+	comandline = text
+	os.system("rm /tmp/command.txt")
+	return comandline
 
 def mountp():
 	pathmp = []
@@ -372,7 +392,7 @@ config.plugins.sftpanel.alias = NoSave(ConfigText(default='', visible_width = 15
 ######################################################################################
 class ToolsScreen2(Screen):
 	skin = """
-	<screen name="ToolsScreen2" position="center,225" size="1300,720" title="Service Tools">
+	<screen name="ToolsScreen2" position="center,225" size="1300,720" title="Utilidades de Servicio">
 	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
 <ePixmap pixmap="MX_HQ7/menu/sertools.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
 <ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
@@ -403,7 +423,7 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 		self.session = session
 		Screen.__init__(self, session)
 		self.iConsole = iConsole()
-		self.setTitle(_("Service Tools"))
+		self.setTitle(_("Utilidades de Servicio"))
 		self.indexpos = None
 		self["shortcuts"] = NumberActionMap(["ShortcutActions", "WizardActions", "NumberActions"],
 		{
@@ -425,18 +445,18 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def mList(self):
 		self.list = []
-		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/crash.png"))
-		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/info50.png"))
-		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/epg.png"))
-		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/vset.png"))
-		fivepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/script.png"))
-		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/ntp.png"))
-		self.list.append((_("Crashlog viewer"), 1, _("view & remove crashlog files"), onepng ))
-		self.list.append((_("View settings"), 2, _("view system settings"), fourpng ))
-		self.list.append((_("System info"), 3, _("system info (free, dh -f, hosts)"), twopng ))
-		self.list.append((_("EPG Downloader"), 4, _("EPG from %s" % config.plugins.sftpanel.url.value.split('/')[2]), treepng ))
-		self.list.append((_("Synchronization NTP"), 5, _("Synchronization ntp every 30 min,60 min,120 min, 240 min and Now"), sixpng ))
-		self.list.append((_("User Scripts"), 6, _("Start scripts from /usr/script"), fivepng ))
+		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//crash.png"))
+		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//info50.png"))
+		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//epg.png"))
+		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//vset.png"))
+		fivepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//script.png"))
+		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//ntp.png"))
+		self.list.append((_("Ver log Errores"), 1, _("Gestion de archivos de error generados por la imagen"), onepng ))
+		self.list.append((_("Ver configuracion"), 2, _("Ver configuracion del sistema de la imagen"), fourpng ))
+		self.list.append((_("Informacion del sistema"), 3, _("Informacion del sistema (free, dh -f, hosts)"), twopng ))
+		self.list.append((_("Gestion EPG"), 4, _("EPG from %s" % config.plugins.sftpanel.url.value.split('/')[2]), treepng ))
+		self.list.append((_("Sincronizacion NTP"), 5, _("Gestion sincronizacion ntp horaria"), sixpng ))
+		self.list.append((_("Script Usuario"), 6, _("Ejecutar script usuario en /usr/script"), fivepng ))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
 		self["menu"].setList(self.list)
@@ -462,7 +482,8 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 	def select_item(self, item):
 		if item:
 			if item is 1:
-				self.session.open(CrashLogScreen)
+				from Screens.LogManager import LogManager
+				self.session.open(LogManager)
 			elif item is 2:
 				self.session.open(ViewSet)
 			elif item is 3:
@@ -482,9 +503,9 @@ class ServiceMan(Screen):
 	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_green" render="Label" position="190,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_yellow" render="Label" position="360,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
-	<ePixmap position="190,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
-	<ePixmap position="360,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" alphatest="blend" />
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="190,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="360,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
 	<widget source="menu" render="Listbox" position="20,20" size="710,253" itemHeight="25" scrollbarMode="showOnDemand">
 	<convert type="TemplatedMultiContent">
 	{"template": [
@@ -501,7 +522,7 @@ class ServiceMan(Screen):
 		self.session = session
 		Screen.__init__(self, session)
 		self.iConsole = iConsole()
-		self.setTitle(_("Service Manager"))
+		self.setTitle(_("Gestion de Servicios"))
 		self["shortcuts"] = ActionMap(["ShortcutActions", "DirectionActions"],
 
 		{
@@ -520,13 +541,13 @@ class ServiceMan(Screen):
 		
 	def CfgMenu(self):
 		self.list = []
-		self.list.append((_("Manage Networking service"), "networking"))
-		self.list.append((_("Manage Internet superserver (inetd)"), "inetd.busybox"))
-		self.list.append((_("Manage Syslog/klogd service"), "syslog.busybox"))
-		self.list.append((_("Manage Dropbear SSH service"), "dropbear"))
-		self.list.append((_("Manage BusyBox-Cron service"), "busybox-cron"))
+		self.list.append((_("Gestion Servicio de Red"), "networking"))
+		self.list.append((_("Gestion Servicio Internet (inetd)"), "inetd.busybox"))
+		self.list.append((_("Gestion Servicio Syslog"), "syslog.busybox"))
+		self.list.append((_("Gestion Servicio SSH"), "dropbear"))
+		self.list.append((_("Gestion Servicio Cron"), "busybox-cron"))
 		if fileExists('/etc/init.d/udpxy.sh') and fileExists('/usr/bin/udpxy'):
-			self.list.append((_("Manage Udpxy service"), "udpxy.sh"))
+			self.list.append((_("Gestion Servicio UDPXY"), "udpxy.sh"))
 		if fileExists('/etc/init.d/livestreamersrv'):
 			self.list.append((_("Manage Livestreamer service"), "livestreamersrv"))
 		self["menu"].setList(self.list)
@@ -571,7 +592,7 @@ class ServiceMan(Screen):
 class SwapScreen2(Screen):
 	skin = """
 		<screen name="SwapScreen2" position="center,160" size="750,370" title="Swap on USB/HDD">
-	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="menu" render="Listbox" position="20,20" size="710,253" scrollbarMode="showOnDemand">
 	<convert type="TemplatedMultiContent">
@@ -610,8 +631,8 @@ class SwapScreen2(Screen):
 		
 	def Menu(self):
 		self.list = []
-		minispng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/swapmini.png"))
-		minisonpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/swapminion.png"))
+		minispng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//swapmini.png"))
+		minisonpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//swapminion.png"))
 		if self.is_zram():
 			if fileExists("/proc/swaps"):
 				for line in open("/proc/swaps"):
@@ -661,7 +682,7 @@ class SwapScreen2(Screen):
 class SwapScreen(Screen):
 	skin = """
 	<screen name="SwapScreen" position="center,160" size="750,370" title="Swap on USB/HDD">
-	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="menu" render="Listbox" position="20,20" size="710,253" scrollbarMode="showOnDemand">
 	<convert type="TemplatedMultiContent">
@@ -752,8 +773,8 @@ class SwapScreen(Screen):
 
 	def CfgMenu(self):
 		self.list = []
-		minispng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/swapmini.png"))
-		minisonpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/swapminion.png"))
+		minispng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//swapmini.png"))
+		minisonpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//swapminion.png"))
 		if self.isSwapPossible():
 			if os.path.exists(self.swapfile):
 				if self.isSwapRun():
@@ -828,12 +849,12 @@ class create_swap(Screen):
 class UsbScreen(Screen):
 	skin = """
 <screen name="UsbScreen" position="center,160" size="750,370" title="Unmount manager">
-	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_green" render="Label" position="190,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_yellow" render="Label" position="360,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="190,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
-	<ePixmap position="360,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" alphatest="blend" />
+	<ePixmap position="190,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="360,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
 	<widget source="menu" render="Listbox" position="20,20" size="710,253" scrollbarMode="showOnDemand">
 	<convert type="TemplatedMultiContent">
 	{"template": [
@@ -871,7 +892,7 @@ class UsbScreen(Screen):
 		
 	def CfgMenu(self):
 		self.list = []
-		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/usbico.png"))
+		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//usbico.png"))
 		hddlist = harddiskmanager.HDDList()
 		hddinfo = ""
 		if hddlist:
@@ -951,7 +972,7 @@ class ScriptScreen3(Screen):
 		Screen.__init__(self, session)
 		self.session = session
 		self.script, self.name = '', ''
-		self.setTitle(_("Script Executer"))
+		self.setTitle(_("Ejecutar script"))
 		self.iConsole = iConsole()
 		self.scrpit_menu()
 		self["key_green"] = StaticText(_("Run"))
@@ -1033,18 +1054,18 @@ class NTPScreen(ConfigListScreen, Screen):
 			"blue": self.Manual,
 			"ok": self.save_values
 		}, -2)
-		self.list.append(getConfigListEntry(_("NtpTime Updater"), config.plugins.sftpanel.onoff))
-		self.list.append(getConfigListEntry(_("Set time to update"), config.plugins.sftpanel.time))
-		self.list.append(getConfigListEntry(_("Set Transponder time update"), config.plugins.sftpanel.TransponderTime))
-		self.list.append(getConfigListEntry(_("StartUp synchronization"), config.plugins.sftpanel.cold))
-		self.list.append(getConfigListEntry(_("Set choice server mode"), config.plugins.sftpanel.manual))
-		self.list.append(getConfigListEntry(_("Set your country"), config.plugins.sftpanel.server))
-		self.list.append(getConfigListEntry(_("Set manual ntp server address"), config.plugins.sftpanel.manualserver))
+		self.list.append(getConfigListEntry(_("Actualizacion ntp automatica"), config.plugins.sftpanel.onoff))
+		self.list.append(getConfigListEntry(_("Configuracion ntp actualizacion"), config.plugins.sftpanel.time))
+		self.list.append(getConfigListEntry(_("Actualizacion por Transpondedor"), config.plugins.sftpanel.TransponderTime))
+		self.list.append(getConfigListEntry(_("Sincronizacion de inicio"), config.plugins.sftpanel.cold))
+		self.list.append(getConfigListEntry(_("Modo Servidor"), config.plugins.sftpanel.manual))
+		self.list.append(getConfigListEntry(_("Seleccione su Pais"), config.plugins.sftpanel.server))
+		self.list.append(getConfigListEntry(_("Manual direccion Servidor"), config.plugins.sftpanel.manualserver))
 		ConfigListScreen.__init__(self, self.list)
 		self.onShow.append(self.Title)
 		
 	def Title(self):
-		self.setTitle(_("NtpTime Updater"))
+		self.setTitle(_("Actualizacion NTP"))
 
 	def cancel(self):
 		for i in self["config"].list:
@@ -1160,9 +1181,9 @@ class ManualSetTime(ConfigListScreen, Screen):
 	skin = """
 <screen name="ManualSetTime" position="center,160" size="750,370" title="NtpTime Updater">
 	<widget position="15,10" size="720,200" name="config" />
-	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 	def __init__(self, session):
@@ -1214,7 +1235,7 @@ class ManualSetTime(ConfigListScreen, Screen):
 ######################################################################################
 class SystemScreen(Screen):
 	skin = """
-		<screen name="SystemScreen" position="center,225" size="1300,720" title="System Tools">
+		<screen name="SystemScreen" position="center,225" size="1300,720" title="Utilidades Systema">
 	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
 <ePixmap pixmap="MX_HQ7/menu/sistemtools.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
 <ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
@@ -1245,7 +1266,7 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 		self.session = session
 		Screen.__init__(self, session)
 		self.indexpos = None
-		self.setTitle(_("System Tools"))
+		self.setTitle(_("Utilidades sistema"))
 		self["shortcuts"] = NumberActionMap(["ShortcutActions", "WizardActions", "NumberActions"],
 		{
 			"ok": self.keyOK,
@@ -1265,18 +1286,18 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def mList(self):
 		self.list = []
-		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/kernel.png"))
-		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/serviceman.png"))
-		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/unusb.png"))
-		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/swap.png"))
-		fivepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/cron.png"))
-		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/hosts.png"))
-		self.list.append((_("Kernel Modules Manager"), 1, _("load & unload kernel modules"), onepng))
-		self.list.append((_("Service Manager"), 2, _("Start, Stop, Restart system services"), twopng))
-		self.list.append((_("Cron Manager"), 3, _("Is a time-based job scheduler"), fivepng))
-		self.list.append((_("Swap Manager"), 4, _("Start, Stop, Create, Remove Swap file"), fourpng ))
-		self.list.append((_("UnMount USB"), 5, _("Unmount usb devices"), treepng ))
-		self.list.append((_("Hosts editor"), 6, _("add/remove records in /etc/hosts"), sixpng ))
+		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//kernel.png"))
+		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//serviceman.png"))
+		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//unusb.png"))
+		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//swap.png"))
+		fivepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//cron.png"))
+		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//hosts.png"))
+		self.list.append((_("Gestion Modulos Kernel"), 1, _("Activar desactivar modulos kernel"), onepng))
+		self.list.append((_("Gestion Servicios"), 2, _("Controla la activacion de servicios"), twopng))
+		self.list.append((_("Gestion Cron"), 3, _("Automatiza la ejecucion de procesos"), fivepng))
+		self.list.append((_("Gestion Swap"), 4, _("Administra la creacion memoria swap"), fourpng ))
+		self.list.append((_("Desmontar USB"), 5, _("Desmonta unidades montadas usb"), treepng ))
+		self.list.append((_("Editor Host"), 6, _("Modifica archivo /etc/hosts"), sixpng ))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
 		self["menu"].setList(self.list)
@@ -1370,8 +1391,8 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def mList(self):
 		self.list = []
-		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/tunerserver.png"))
-		self.list.append((_("TunerServer"), 1, _("TunerServer"), onepng))
+		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//tunerserver.png"))
+		self.list.append((_("TunerServer"), 1, _("Crea tus listas canales m3u para streaming"), onepng))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
 		self["menu"].setList(self.list)
@@ -1408,14 +1429,14 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 class KernelScreen(Screen):
 	skin = """
 <screen name="KernelScreen" position="center,100" size="750,570" title="Kernel Modules Manager">
-	<ePixmap position="20,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,528" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_green" render="Label" position="185,528" zPosition="2" size="210,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="190,558" zPosition="1" size="200,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
-	<ePixmap position="390,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" transparent="1" alphatest="on" />
+	<ePixmap position="190,558" zPosition="1" size="200,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="390,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" transparent="1" alphatest="on" />
 	<widget source="key_yellow" render="Label" position="390,528" zPosition="2" size="170,30" valign="center" halign="center" font="Regular;22" transparent="1" />
 	<widget source="key_blue" render="Label" position="560,528" zPosition="2" size="170,30" valign="center" halign="center" font="Regular;22" transparent="1" />
-	<ePixmap position="560,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/blue.png" transparent="1" alphatest="on" />
+	<ePixmap position="560,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/blue.png" transparent="1" alphatest="on" />
 	<widget source="menu" render="Listbox" position="20,10" size="710,500" scrollbarMode="showOnDemand">
 	<convert type="TemplatedMultiContent">
 	{"template": [
@@ -1437,7 +1458,7 @@ class KernelScreen(Screen):
 		self.index = 0
 		self.runmodule = ''
 		self.module_list()
-		self.setTitle(_("Kernel Modules Manager"))
+		self.setTitle(_("Gestion modulos Kernel"))
 		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
 		{
 			"ok": self.Ok,
@@ -1476,8 +1497,8 @@ class KernelScreen(Screen):
 					
 	def CfgMenu(self, result):
 		self.list = []
-		minipngmem = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/kernelminimem.png"))
-		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/kernelmini.png"))
+		minipngmem = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//kernelminimem.png"))
+		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//kernelmini.png"))
 		if result:
 			for line in result.splitlines():
 				if line.split('/')[-1][:-3].replace('-','_') in self.runmodule.replace('-','_'):
@@ -1524,7 +1545,7 @@ class KernelScreen(Screen):
 class lsmodScreen(Screen):
 	skin = """
 <screen name="lsmodScreen" position="center,100" size="750,570" title="Kernel Drivers in Memory">
-	<ePixmap position="20,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,528" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="menu" render="Listbox" position="20,10" size="710,500" scrollbarMode="showOnDemand">
 	<convert type="TemplatedMultiContent">
@@ -1544,7 +1565,7 @@ class lsmodScreen(Screen):
 		self.session = session
 		Screen.__init__(self, session)
 		self.iConsole = iConsole()
-		self.setTitle(_("Kernel Drivers in Memory"))
+		self.setTitle(_("Kernel Drivers en memoria"))
 		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
 		{
 			"cancel": self.exit,
@@ -1562,7 +1583,7 @@ class lsmodScreen(Screen):
 	def run_modules_list(self, result, retval, extra_args):
 		self.list = []
 		aliasname = ''
-		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/kernelminimem.png"))
+		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//kernelminimem.png"))
 		if retval is 0:
 			for line in result.splitlines():
 				if len(line.split()) > 3:
@@ -1576,171 +1597,6 @@ class lsmodScreen(Screen):
 
 	def exit(self):
 		self.close()
-######################################################################################
-class CrashLogScreen(Screen):
-	skin = """
-<screen name="CrashLogScreen" position="center,225" size="1300,720" title="View or Remove Crashlog files">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/maincrash.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_blue" render="Label" position="990,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
-<convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (70, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3), 
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
-	</screen>"""
-
-	def __init__(self, session):
-		self.session = session
-		Screen.__init__(self, session)
-		self.iConsole = iConsole()
-		self.path = config.plugins.sftpanel.crashpath.value
-		self.setTitle(_("View or Remove Crashlog files"))
-		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
-		{
-			"ok": self.Ok,
-			"cancel": self.exit,
-			"back": self.exit,
-			"red": self.exit,
-			"green": self.Ok,
-			"yellow": self.YellowKey,
-			"blue": self.BlueKey,
-			})
-		self["key_green"] = StaticText(_("View"))
-		self["key_yellow"] = StaticText(_("Remove"))
-		self["key_blue"] = StaticText(_("Remove All"))
-		self.list = []
-		self["menu"] = List(self.list)
-		self.CfgMenu()
-		
-	def CfgMenu(self):
-		self.list = []
-		minipng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/crashmini.png"))
-		if pathExists(self.path):
-			crashfiles = os.listdir(self.path)
-			for line in crashfiles:
-				if "enigma2_crash" in line:
-					try:
-						self.list.append((line,"%s" % time.ctime(os.path.getctime(self.path + line)), minipng))
-					except Exception as e:
-						now = time.localtime(time.time())
-						logging('%02d:%02d:%d %02d:%02d:%02d - %s\r\n' % (now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec, str(e)))
-		self.list.sort()
-		self["menu"].setList(self.list)
-		self["actions"] = ActionMap(["OkCancelActions"], { "cancel": self.close}, -1)
-		
-	def Ok(self):
-		try:
-			if self["menu"].getCurrent()[0] is not None:
-				item = self.path + self["menu"].getCurrent()[0]
-				self.session.openWithCallback(self.CfgMenu,LogScreen, item)
-		except Exception as e:
-			now = time.localtime(time.time())
-			logging('%02d:%02d:%d %02d:%02d:%02d - %s\r\n' % (now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec, str(e)))
-	
-	def YellowKey(self):
-		if self["menu"].getCurrent()[0] is not None:
-			item = self.path + self["menu"].getCurrent()[0]
-			if fileExists(item):
-				os.remove(item)
-			self.mbox = self.session.open(MessageBox,(_("Removed %s") % item), MessageBox.TYPE_INFO, timeout = 4 )
-		self.CfgMenu()
-		
-	def BlueKey(self):
-		log_name = []
-		dirs = os.listdir(self.path)
-		for log_file in dirs:
-			if log_file.endswith(".log") and log_file.startswith("enigma2_crash"):
-				log_name.append('%s%s' % (self.path, log_file))
-		try:
-			for file in log_name:
-				os.remove(file)
-		except Exception as e:
-			now = time.localtime(time.time())
-			logging('%02d:%02d:%d %02d:%02d:%02d - %s\r\n' % (now.tm_mday, now.tm_mon, now.tm_year, now.tm_hour, now.tm_min, now.tm_sec, str(e)))
-		self.mbox = self.session.open(MessageBox,(_("Removed All Crashlog Files") ), MessageBox.TYPE_INFO, timeout = 4 )
-		self.CfgMenu()
-		
-	def exit(self):
-		self.close()
-######################################################################################
-class LogScreen(Screen):
-	skin = """
-<screen name="LogScreen" position="center,80" size="1170,600" title="View Crashlog file">
-	<ePixmap position="20,590" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
-	<widget source="key_red" render="Label" position="20,560" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="190,590" zPosition="1" size="200,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
-	<widget source="key_green" render="Label" position="190,560" zPosition="2" size="200,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="390,590" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" alphatest="blend" />
-	<widget source="key_yellow" render="Label" position="390,560" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<widget name="text" position="10,10" size="1150,542" font="Console;22" />
-</screen>"""
-
-	def __init__(self, session, what):
-		self.session = session
-		Screen.__init__(self, session)
-		self.iConsole = iConsole()
-		self.crashfile = what
-		self.setTitle(_("View Crashlog file"))
-		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
-		{
-			"cancel": self.exit,
-			"back": self.exit,
-			"red": self.exit,
-			"green": self.GreenKey,
-			"yellow": self.YellowKey,
-			})
-		self["key_red"] = StaticText(_("Close"))
-		self["key_green"] = StaticText(_("Restart GUI"))
-		self["key_yellow"] = StaticText(_("Save"))
-		self["text"] = ScrollLabel("")
-		self.listcrah()
-		
-	def exit(self):
-		self.close()
-	
-	def GreenKey(self):
-		self.session.open(TryQuitMainloop, 3)
-		
-	def YellowKey(self):
-		self.iConsole.ePopen("gzip %s && mv %s.gz /tmp" % (self.crashfile, self.crashfile), self.info_create)
-		
-	def info_create(self, result, retval, extra_args):
-		if retval is 0:
-			self.mbox = self.session.open(MessageBox,_("%s.gz created in /tmp") % self.crashfile, MessageBox.TYPE_INFO, timeout = 4)
-		else:
-			self.mbox = self.session.open(MessageBox,_("Failure..."), MessageBox.TYPE_INFO, timeout = 4)
-		
-	def listcrah(self):
-		list = ""
-		with open(self.crashfile, "r") as files:
-			for line in files:
-				if "Traceback (most recent call last):" in line or "PC:" in line:
-					for line in files:
-						list += line
-						if "]]>" in line:
-							break
-		self["text"].setText(list)
-		self["actions"] = ActionMap(["OkCancelActions", "DirectionActions"], { "cancel": self.close, "up": self["text"].pageUp, "left": self["text"].pageUp, "down": self["text"].pageDown, "right": self["text"].pageDown,}, -1)
 ######################################################################################
 class get_source(Screen):
 	skin = """
@@ -1794,8 +1650,8 @@ class get_source(Screen):
 		
 	def CfgMenu(self):
 		self.list = []
-		if fileExists("/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/epghosts.txt"):
-			for line in open("/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/epghosts.txt"):
+		if fileExists("/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/epghosts.txt"):
+			for line in open("/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/epghosts.txt"):
 				if line.startswith('http://'):
 					self.list.append((line, line))
 		self["menu"].setList(self.list)
@@ -1999,12 +1855,12 @@ class get_epg_dat(Screen):
 class onidMan(Screen):
 	skin = """
 <screen name="onidMan" position="center,160" size="750,255" title="blacklist.onid Manager - %s">
-	<ePixmap position="20,250" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,250" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,220" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_green" render="Label" position="195,220" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="195,250" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="195,250" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_yellow" render="Label" position="370,220" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="370,250" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" alphatest="blend" />
+	<ePixmap position="370,250" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
 	<widget source="menu" render="Listbox" position="15,15" size="720,288" scrollbarMode="showOnDemand">
 		<convert type="TemplatedMultiContent">
 	{"template": [
@@ -2071,9 +1927,9 @@ class onidManAdd(ConfigListScreen, Screen):
 	skin = """
 <screen name="onidManAdd" position="center,160" size="750,255" title="add onid - %s" >
 	<widget position="15,10" size="720,300" name="config" scrollbarMode="showOnDemand" />
-	<ePixmap position="10,250" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="10,250" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="10,220" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="175,250" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="175,250" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_green" render="Label" position="175,220" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
@@ -2135,12 +1991,12 @@ class onidManAdd(ConfigListScreen, Screen):
 class CrontabMan(Screen):
 	skin = """
 <screen name="CrontabMan" position="center,160" size="750,370" title="CtronTab Manager - %s">
-	<ePixmap position="20,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_green" render="Label" position="195,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="195,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="195,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_yellow" render="Label" position="370,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="370,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" alphatest="blend" />
+	<ePixmap position="370,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
 	<widget source="menu" render="Listbox" position="15,15" size="720,288" scrollbarMode="showOnDemand">
 		<convert type="TemplatedMultiContent">
 	{"template": [
@@ -2203,9 +2059,9 @@ class CrontabManAdd(ConfigListScreen, Screen):
 	skin = """
 <screen name="CrontabManAdd" position="center,160" size="750,370" title="add tabs - %s" >
 	<widget position="15,10" size="720,300" name="config" scrollbarMode="showOnDemand" />
-	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
@@ -2270,8 +2126,8 @@ class CrontabManAdd(ConfigListScreen, Screen):
 ######################################################################################
 class Info2Screen(Screen):
 	skin = """
-<screen name="Info2Screen" position="center,100" size="890,560" title="System Info">
-	<ePixmap position="20,548" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+<screen name="Info2Screen" position="center,100" size="890,560" title="Informacion Sistema">
+	<ePixmap position="20,548" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,518" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget name="text" position="15,10" size="860,500" font="Console;20" />
 </screen>"""
@@ -2280,7 +2136,7 @@ class Info2Screen(Screen):
 		self.session = session
 		Screen.__init__(self, session)
 		self.iConsole = iConsole()
-		self.setTitle(_("System Info"))
+		self.setTitle(_("Informacion Sistema"))
 		self["text"] = ScrollLabel("")
 		self["actions"] = ActionMap(["ShortcutActions", "WizardActions", "DirectionActions", "OkCancelActions"],
 		{
@@ -2336,7 +2192,7 @@ class Info2Screen(Screen):
 class ViewSet(Screen):
 	skin = """
 <screen name="ViewSet" position="center,80" size="1170,600" title="View System Settings (/etc/enigma2/settings)">
-	<ePixmap position="20,590" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,590" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,560" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget name="text" position="20,10" size="1130,542" font="Console;22" />
 </screen>"""
@@ -2344,7 +2200,7 @@ class ViewSet(Screen):
 	def __init__(self, session):
 		self.session = session
 		Screen.__init__(self, session)
-		self.setTitle(_("View System Settings (/etc/enigma2/settings)"))
+		self.setTitle(_("Ver configuracion sistema (/etc/enigma2/settings)"))
 		self["shortcuts"] = ActionMap(["ShortcutActions", "WizardActions"],
 		{
 			"cancel": self.exit,
@@ -2377,12 +2233,12 @@ class ViewSet(Screen):
 class HostsScreen(Screen):
 	skin = """
 <screen name="HostsScreen" position="center,160" size="750,370" title="/etc/hosts editor">
-	<ePixmap position="20,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_green" render="Label" position="195,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="195,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="195,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_yellow" render="Label" position="370,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="370,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/yellow.png" alphatest="blend" />
+	<ePixmap position="370,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
 	<widget source="menu" render="Listbox" position="15,15" size="720,288" scrollbarMode="showOnDemand">
 		<convert type="TemplatedMultiContent">
 	{"template": [
@@ -2442,9 +2298,9 @@ class AddRecord(ConfigListScreen, Screen):
 	skin = """
 <screen name="AddRecord" position="center,160" size="750,370" title="add record" >
 	<widget position="15,10" size="720,300" name="config" scrollbarMode="showOnDemand" />
-	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/images/green.png" alphatest="blend" />
+	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
 	<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
@@ -2517,13 +2373,18 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 		self.session = session
 		Screen.__init__(self, session)
 		self.indexpos = None
-		self.setTitle(_("User Tools"))
+		self.setTitle(_("Utilidades de Usuario"))
+		self["key_red"] = StaticText(_("Close"))
+		self["key_green"] = StaticText(_("Picon Movistar"))
+		self["key_yellow"] = StaticText(_("Lista Canales"))
 		self["shortcuts"] = NumberActionMap(["ShortcutActions", "WizardActions", "NumberActions"],
 		{
 			"ok": self.keyOK,
 			"cancel": self.exit,
 			"back": self.exit,
 			"red": self.exit,
+			"green": self.picon,
+			"yellow": self.addonsyellow,
 			"1": self.go,
 			"2": self.go,
 			"3": self.go,
@@ -2537,20 +2398,27 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def mList(self):
 		self.list = []
-		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/drop.png"))
-		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/ddns.png"))
-		trespng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/passw.png"))
-		cuatropng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "Extensions/sftpanel/images/picon.png"))
-		self.list.append((_("Cache Flush"), 1, _("free pagecache, dentries and inodes"), onepng))
-		self.list.append((_("Dynamic DNS"), 2, _("synchronization settings DDNS"), twopng))
-		self.list.append((_("change password"), 3, _("Change password"), trespng))
-		self.list.append((_("Picon Movistar"), 4, _("Picon Movistar"), cuatropng))
+		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//drop.png"))
+		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//ddns.png"))
+		self.list.append((_("Liberar Memoria"), 1, _("Liberar Memoria ram del receptor"), onepng))
+		self.list.append((_("Editar DNS"), 2, _("Configuracion server DNS"), twopng))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
 		self["menu"].setList(self.list)
 
 	def exit(self):
 		self.close()
+
+	def picon(self):
+		self.session.open(Console, cmdlist=["cd /usr/lib/enigma2/python/Tools ; python ./downloadpicon.py"])
+
+	def addonsyellow(self):
+		self.Timer = eTimer()
+		self.Timer.stop()
+		self.session.openWithCallback(self.ShowSoftcamCallback, ShowSoftcamPackages)
+
+	def ShowSoftcamCallback(self):
+		self.Timer.start(2000, True)
 		
 	def go(self, num = None):
 		if num is not None:
@@ -2573,11 +2441,7 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 				self.session.open(DropScreen)
 			elif item is 2:
 				self.session.open(DDNSScreen)
-			elif item is 3:
-				import Password
-            			self.session.open(Password.PasswordChanger)
-			elif item is 4:
-				self.session.open(Console, cmdlist=["cd /usr/lib/enigma2/python/Tools ; python ./downloadpicon.py"])
+			
 			else:
 				self.close(None)
 ######################################################################################
@@ -2620,16 +2484,16 @@ class DDNSScreen(ConfigListScreen, Screen):
 			"yellow": self.UpdateNow,
 			"ok": self.save_values
 		}, -2)
-		self.list.append(getConfigListEntry(_("Select DDNS server"), config.plugins.sftpanel.dnsserver))
-		self.list.append(getConfigListEntry(_("Username"), config.plugins.sftpanel.dnsuser))
+		self.list.append(getConfigListEntry(_("Seleccione Servidor DDNS"), config.plugins.sftpanel.dnsserver))
+		self.list.append(getConfigListEntry(_("Usuario"), config.plugins.sftpanel.dnsuser))
 		self.list.append(getConfigListEntry(_("Password"), config.plugins.sftpanel.dnspass))
-		self.list.append(getConfigListEntry(_("Hostname"), config.plugins.sftpanel.dnshost))
-		self.list.append(getConfigListEntry(_("Update Time"), config.plugins.sftpanel.dnstime))
+		self.list.append(getConfigListEntry(_("Nombre de Host"), config.plugins.sftpanel.dnshost))
+		self.list.append(getConfigListEntry(_("Actualizar cada"), config.plugins.sftpanel.dnstime))
 		ConfigListScreen.__init__(self, self.list)
 		self.onShow.append(self.Title)
 		
 	def Title(self):
-		self.setTitle(_("Dynamic DNS"))
+		self.setTitle(_("Configuracion DNS"))
 
 	def cancel(self):
 		for i in self["config"].list:
@@ -2655,7 +2519,7 @@ class DDNSScreen(ConfigListScreen, Screen):
 			updatestr = "http://%s:%s@dynupdate.no-ip.com/nic/update?hostname=%s" % (config.plugins.sftpanel.dnsuser.value, config.plugins.sftpanel.dnspass.value, config.plugins.sftpanel.dnshost.value)
 		else:
 			updatestr = "https://%s:%s@nic.changeip.com/nic/update?cmd=update&set=$CIPSET&hostname=%s" % (config.plugins.sftpanel.dnsuser.value, config.plugins.sftpanel.dnspass.value, config.plugins.sftpanel.dnshost.value)
-		with open('/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/no-ip.py', 'w') as update_script:
+		with open('/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/no-ip.py', 'w') as update_script:
 			update_script.write('#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n# Copyright (c) 2boom 2014-16\n\n')
 			update_script.write('import requests\n\n')
 			update_script.write('res = requests.get("%s")\n' % updatestr)
@@ -2666,19 +2530,19 @@ class DDNSScreen(ConfigListScreen, Screen):
 		if config.plugins.sftpanel.dnstime.value is not '0':
 			with open(self.path, 'a') as cron_root:
 				if config.plugins.sftpanel.dnstime.value not in ('1', '2', '3'):
-					cron_root.write('*/%s * * * * python /usr/lib/enigma2/python/Plugins/Extensions/sftpanel/no-ip.py\n' % config.plugins.sftpanel.dnstime.value)
+					cron_root.write('*/%s * * * * python /usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/no-ip.py\n' % config.plugins.sftpanel.dnstime.value)
 				else:
-					cron_root.write('1 */%s * * * python /usr/lib/enigma2/python/Plugins/Extensions/sftpanel/no-ip.py\n' % config.plugins.sftpanel.dnstime.value)
+					cron_root.write('1 */%s * * * python /usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/no-ip.py\n' % config.plugins.sftpanel.dnstime.value)
 				cron_root.close()
 			with open('%scron.update' % self.path[:-4], 'w') as cron_update:
 				cron_update.write('root')
 				cron_update.close()
 
 	def UpdateNow(self):
-		if not fileExists('/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/no-ip.py'):
+		if not fileExists('/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/no-ip.py'):
 			self.create_script()
-		if fileExists('/usr/lib/enigma2/python/Plugins/Extensions/sftpanel/no-ip.py'):
-			self.session.open(Console, title = _("DNS updating..."), cmdlist = ["python /usr/lib/enigma2/python/Plugins/Extensions/sftpanel/no-ip.py"], closeOnSuccess = False)
+		if fileExists('/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/no-ip.py'):
+			self.session.open(Console, title = _("DNS updating..."), cmdlist = ["python /usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/no-ip.py"], closeOnSuccess = False)
 		else:
 			self.mbox = self.session.open(MessageBox,(_("update script not found...")), MessageBox.TYPE_INFO, timeout = 4 )
 
@@ -2715,10 +2579,10 @@ class DropScreen(ConfigListScreen, Screen):
 		self.iConsole = iConsole()
 		self.path = cronpath()
 		self["key_green"] = StaticText(_("Save"))
-		self["key_yellow"] = StaticText(_("Flush Now"))
+		self["key_yellow"] = StaticText(_("Liberar"))
 		self["memTotal"] = StaticText()
 		self["bufCache"] = StaticText()
-		self["MemoryLabel"] = StaticText(_("Memory:"))
+		self["MemoryLabel"] = StaticText(_("Memoria:"))
 		self["setupActions"] = ActionMap(["SetupActions", "ColorActions", "EPGSelectActions"],
 		{
 			"red": self.cancel,
@@ -2727,13 +2591,13 @@ class DropScreen(ConfigListScreen, Screen):
 			"yellow": self.ClearNow,
 			"ok": self.save_values
 		}, -2)
-		self.list.append(getConfigListEntry(_("Autotime cache flush"), config.plugins.sftpanel.droptime))
-		self.list.append(getConfigListEntry(_("Set cache flush mode"), config.plugins.sftpanel.dropmode))
+		self.list.append(getConfigListEntry(_("Liberar Memoria Automaticamente"), config.plugins.sftpanel.droptime))
+		self.list.append(getConfigListEntry(_("Tipo de liberacion de memoria"), config.plugins.sftpanel.dropmode))
 		ConfigListScreen.__init__(self, self.list)
 		self.onShow.append(self.Title)
 		
 	def Title(self):
-		self.setTitle(_("Cache Flush"))
+		self.setTitle(_("Liberar Memoria"))
 		self.infomem()
 
 	def cancel(self):
@@ -2788,8 +2652,167 @@ class DropScreen(ConfigListScreen, Screen):
 		
 	def Finish(self, result, retval, extra_args):
 		if retval is 0:
-			self.mbox = self.session.open(MessageBox,(_("Cache flushed")), MessageBox.TYPE_INFO, timeout = 4 )
+			self.mbox = self.session.open(MessageBox,(_("Memoria liberada")), MessageBox.TYPE_INFO, timeout = 4 )
 		else:
 			self.mbox = self.session.open(MessageBox,(_("error...")), MessageBox.TYPE_INFO, timeout = 4 )
 		self.infomem()
 ##################################################################################################
+class ShowSoftcamPackages(Screen):
+	skin = """
+		<screen name="ShowSoftcamPackages" position="center,center" size="630,500" title="Instalar Lista Canales" >
+			<ePixmap pixmap="skin_default/buttons/red.png" position="0,0" size="140,40" alphatest="on" />
+			<ePixmap pixmap="skin_default/buttons/green.png" position="140,0" size="140,40" alphatest="on" />
+			<widget source="key_red" render="Label" position="0,0" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#9f1313" transparent="1" />
+			<widget source="key_green" render="Label" position="140,0" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+			<widget source="key_ok" render="Label" position="240,0" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+			<widget source="list" render="Listbox" position="5,50" size="620,420" scrollbarMode="showOnDemand">
+				<convert type="TemplatedMultiContent">
+					{"template": [
+							MultiContentEntryText(pos = (5, 1), size = (540, 28), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 0 is the name
+							MultiContentEntryText(pos = (5, 26), size = (540, 20), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 2 is the description
+							MultiContentEntryPixmapAlphaBlend(pos = (545, 2), size = (48, 48), png = 4), # index 4 is the status pixmap
+							MultiContentEntryPixmapAlphaBlend(pos = (5, 50), size = (510, 2), png = 5), # index 4 is the div pixmap
+						],
+					"fonts": [gFont("Regular", 22),gFont("Regular", 14)],
+					"itemHeight": 52
+					}
+				</convert>
+			</widget>
+		</screen>"""
+	
+	def __init__(self, session, args = None):
+		Screen.__init__(self, session)
+		self.session = session
+		
+		self["actions"] = ActionMap(["OkCancelActions", "DirectionActions", "ColorActions"],
+		{
+			"red": self.exit,
+			"ok": self.go,
+			"cancel": self.exit,
+			"green": self.startupdateList,
+		}, -1)
+		
+		self.list = []
+		self.statuslist = []
+		self["list"] = List(self.list)
+		self["key_red"] = StaticText(_("cerrar"))
+		self["key_green"] = StaticText(_("Actulizar"))
+		self["key_ok"] = StaticText(_("Instalar"))
+
+		self.oktext = _("\nPresione ok en el mando para continuar.")
+		self.onShown.append(self.setWindowTitle)
+		self.setStatus('list')
+		self.Timer1 = eTimer()
+		self.Timer1.callback.append(self.rebuildList)
+		self.Timer1.start(1000, True)
+		self.Timer2 = eTimer()
+		self.Timer2.callback.append(self.updateList)
+
+	def go(self, returnValue = None):
+		cur = self["list"].getCurrent()
+		if cur:
+			status = cur[3]
+			self.package = cur[2]
+			if status == "installable":
+				self.session.openWithCallback(self.runInstall, MessageBox, _("Va a instalar el paquete:\n") + self.package + "\n" + self.oktext)
+
+	def runInstall(self, result):
+		if result:
+			self.session.openWithCallback(self.runInstallCont, Console, cmdlist = ['opkg install ' + self.package], closeOnSuccess = True)
+
+	def runInstallCont(self):
+			ret = command('opkg list-installed | grep ' + self.package + ' | cut -d " " -f1')
+
+			if ret != self.package:
+				self.session.open(MessageBox, _("Instalacion ha fallado !!"), MessageBox.TYPE_ERROR, timeout = 10)
+			else:
+				self.session.open(MessageBox, _("Instalacion finalizada."), MessageBox.TYPE_INFO, timeout = 10)
+				self.setStatus('list')
+				self.Timer1.start(1000, True)
+
+	def UpgradeReboot(self, result):
+		if result is None:
+			return
+		
+	def exit(self):
+		self.close()
+			
+	def setWindowTitle(self):
+		self.setTitle(_("Instalar Lista Canales"))
+
+	def setStatus(self,status = None):
+		if status:
+			self.statuslist = []
+			divpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_SKIN, "skin_default/div-h.png"))
+			if status == 'update':
+				statuspng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_PLUGIN, "SystemPlugins/sftpanel/images//upgrade.png"))
+				self.statuslist.append(( _("Package list update"), '', _("Tratando descargar nueva actualizacion, espere por favor ..." ),'', statuspng, divpng ))
+				self['list'].setList(self.statuslist)
+			if status == 'list':
+				statuspng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_PLUGIN, "SystemPlugins/sftpanel/images//upgrade.png"))
+				self.statuslist.append(( _("Package list"), '', _("Actualizando la lista canales, espere por favor..." ),'', statuspng, divpng ))
+				self['list'].setList(self.statuslist)
+			elif status == 'error':
+				statuspng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_PLUGIN, "SystemPlugins/sftpanel/images//remove.png"))
+				self.statuslist.append(( _("Error"), '', _("Error al intentar acceder al servidor, pruebe mas tarde." ),'', statuspng, divpng ))
+				self['list'].setList(self.statuslist)				
+
+	def startupdateList(self):
+		self.setStatus('update')
+		self.Timer2.start(1000, True)
+
+	def updateList(self):
+		self.container = eConsoleAppContainer()
+		self.container.appClosed.append(self.doneupdateList)
+		self.setStatus('list')
+		self.container.execute('opkg update')
+
+	def doneupdateList(self, answer):
+		self.container.appClosed.remove(self.doneupdateList)
+		self.Timer1.start(1000, True)
+
+	def rebuildList(self):
+		self.list = []
+		self.Flist = []
+		self.Elist = []
+		t = command('opkg list | grep "enigma2-plugin-settings-"')
+		self.Flist = t.split('\n')
+		tt = command('opkg list-installed | grep "enigma2-plugin-settings-"')
+		self.Elist = tt.split('\n')
+
+		if len(self.Flist) > 0:
+			self.buildPacketList()
+		else:
+			self.setStatus('error')
+
+	def buildEntryComponent(self, name, version, description, state):
+		divpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_SKIN, "skin_default/div-h.png"))
+		if not description:
+			description = ""
+		installedpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_CURRENT_PLUGIN, "SystemPlugins/sftpanel/images//installed.png"))
+		return((name, version, _(description), state, installedpng, divpng))
+
+	def buildPacketList(self):
+		fetchedList = self.Flist
+		excludeList = self.Elist
+
+		if len(fetchedList) > 0:
+			for x in fetchedList:
+				x_installed = False
+				Fx = x.split(' - ')
+				try:
+					if Fx[0].find('-settings-') > -1:
+						for exc in excludeList:
+							Ex = exc.split(' - ')
+							if Fx[0] == Ex[0]:
+								x_installed = True
+								break
+						if x_installed == False:
+							self.list.append(self.buildEntryComponent(Fx[2], Fx[1], Fx[0], "installable"))
+				except:
+					pass
+
+			self['list'].setList(self.list)
+	
+		else:
+			self.setStatus('error')
