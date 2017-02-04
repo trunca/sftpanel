@@ -135,7 +135,7 @@ config.plugins.epgdd = ConfigSubsection()
 config.plugins.sftpanel.direct = ConfigSelection(choices = mountp())
 config.plugins.sftpanel.epgname = ConfigText(default='epg.dat', visible_width = 50, fixed_size = False)
 config.plugins.sftpanel.onid = ConfigText(default='', visible_width = 30, fixed_size = False)
-config.plugins.sftpanel.url = ConfigText(default='http://feed-sfteam.ddns.net/feeds/epg/epg.dat.gz', visible_width = 80, fixed_size = False)
+config.plugins.sftpanel.url = ConfigText(default='http://epg.giclub.tv/epg/epg.datru.gz', visible_width = 80, fixed_size = False)
 config.plugins.sftpanel.leghtfile = ConfigInteger(default = 0)
 config.plugins.sftpanel.checkepgfile = ConfigYesNo(default = False)
 config.plugins.sftpanel.nocheck = ConfigYesNo(default = True)
@@ -392,31 +392,21 @@ config.plugins.sftpanel.alias = NoSave(ConfigText(default='', visible_width = 15
 ######################################################################################
 class ToolsScreen2(Screen):
 	skin = """
-	<screen name="ToolsScreen2" position="center,225" size="1300,720" title="Utilidades de Servicio">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/sertools.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
-<convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (70, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3), 
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+	<screen name="ToolsScreen2" position="center,160" size="750,370" title="Service Tools">
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<widget source="menu" render="Listbox" position="15,10" size="710,300" scrollbarMode="showOnDemand">
+	<convert type="TemplatedMultiContent">
+	{"template": [
+		MultiContentEntryText(pos = (50, 2), size = (580, 25), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 2 is the Menu Titel
+		MultiContentEntryText(pos = (60, 29), size = (580, 18), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 3 is the Description
+		MultiContentEntryPixmapAlphaTest(pos = (5, 5), size = (100, 40), png = 3), # index 4 is the pixmap
+			],
+	"fonts": [gFont("Regular", 23),gFont("Regular", 16)],
+	"itemHeight": 50
+	}
+			</convert>
+		</widget>
 	</screen>"""
 
 	def __init__(self, session):
@@ -948,24 +938,14 @@ class UsbScreen(Screen):
 ######################################################################################
 class ScriptScreen3(Screen):
 	skin = """
-	<screen name="ScriptScreen3" position="center,225" size="1300,720" title="Script Executer">
-  <ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/scriptmenu.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget name="list" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1"/>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+	<screen name="ScriptScreen3" position="center,160" size="750,370" title="Script Executer">
+  <widget name="list" position="20,10" size="710,305" scrollbarMode="showOnDemand" />
+  <ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+  <widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+  <ePixmap position="190,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+  <widget source="key_green" render="Label" position="190,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+<ePixmap position="360,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+  <widget source="key_yellow" render="Label" position="360,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
 	def __init__(self, session):
@@ -1015,25 +995,16 @@ class ScriptScreen3(Screen):
 ######################################################################################
 class NTPScreen(ConfigListScreen, Screen):
 	skin = """
-<screen name="NTPScreen" position="center,225" size="1300,720" title="NtpTime Updater">
-<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/menuconficam.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_blue" render="Label" position="990,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget name="config" position="20,20" size="820,570" font="Regular;28" itemHeight="35" enableWrapAround="1" scrollbarMode="showOnDemand" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x35.png" selectionPixmap="MX_HQ7/menu/button820x35.png" transparent="1"/>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+<screen name="NTPScreen" position="center,160" size="750,370" title="NtpTime Updater">
+		<widget position="15,10" size="720,200" name="config" scrollbarMode="showOnDemand" />
+		<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/epanel/images/red.png" alphatest="blend" />
+		<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+		<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+		<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+		<ePixmap position="340,358" zPosition="1" size="195,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+		<widget source="key_yellow" render="Label" position="340,328" zPosition="2" size="195,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+		<ePixmap position="535,358" zPosition="1" size="195,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/blue.png" alphatest="blend" />
+		<widget source="key_blue" render="Label" position="535,328" zPosition="2" size="195,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
 	def __init__(self, session):
@@ -1235,31 +1206,21 @@ class ManualSetTime(ConfigListScreen, Screen):
 ######################################################################################
 class SystemScreen(Screen):
 	skin = """
-		<screen name="SystemScreen" position="center,225" size="1300,720" title="Utilidades Systema">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/sistemtools.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
-<convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (70, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3), 
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+		<screen name="SystemScreen" position="center,160" size="750,370" title="Utilidades del Sistema">
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/Extensions/epanel/images/red.png" alphatest="blend" />
+	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<widget source="menu" render="Listbox" position="15,10" size="710,300" scrollbarMode="showOnDemand">
+	<convert type="TemplatedMultiContent">
+	{"template": [
+		MultiContentEntryText(pos = (50, 2), size = (580, 25), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 2 is the Menu Titel
+		MultiContentEntryText(pos = (60, 29), size = (580, 18), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 3 is the Description
+		MultiContentEntryPixmapAlphaTest(pos = (5, 5), size = (100, 40), png = 3), # index 4 is the pixmap
+			],
+	"fonts": [gFont("Regular", 23),gFont("Regular", 16)],
+	"itemHeight": 50
+	}
+			</convert>
+		</widget>
 	</screen>"""
 
 	def __init__(self, session):
@@ -1340,32 +1301,21 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 ######################################################################################
 class multimedia(Screen):
 	skin = """
-		<screen name="multimedia" position="center,225" size="1300,720" title="multimedia">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/multimediapanel.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
-<convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (70, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3), 
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
-	</screen>"""
+		<screen name="multimedia" position="center,100" size="750,570" title="multimedia">
+	<ePixmap position="20,558" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<widget source="key_red" render="Label" position="20,528" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<widget source="menu" render="Listbox" position="20,10" size="710,500" scrollbarMode="showOnDemand">
+	<convert type="TemplatedMultiContent">
+	{"template": [
+		MultiContentEntryText(pos = (70, 2), size = (580, 25), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 2 is the Menu Titel
+		MultiContentEntryPixmapAlphaTest(pos = (5, 5), size = (51, 40), png = 3), # index 4 is the pixmap
+			],
+	"fonts": [gFont("Regular", 23),gFont("Regular", 16)],
+	"itemHeight": 50
+	}
+			</convert>
+		</widget>
+</screen>"""
 
 	def __init__(self, session):
 		self.session = session
@@ -1391,7 +1341,7 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def mList(self):
 		self.list = []
-		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//tunerserver.png"))
+		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/tunerserver.png"))
 		self.list.append((_("TunerServer"), 1, _("Crea tus listas canales m3u para streaming"), onepng))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
@@ -1600,33 +1550,21 @@ class lsmodScreen(Screen):
 ######################################################################################
 class get_source(Screen):
 	skin = """
-<screen name="get_source" position="center,225" size="1300,720" title="Choice epg.dat source">
-<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/epgmenu.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_blue" render="Label" position="990,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
-<convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (10, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+<screen name="get_source" position="center,160" size="850,255" title="Choice epg.dat source">
+	<widget source="key_red" render="Label" position="20,220" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<widget source="key_green" render="Label" position="190,220" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />	
+	<ePixmap position="20,250" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="190,250" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<widget source="menu" render="Listbox" position="15,10" size="820,250" itemHeight="25" scrollbarMode="showOnDemand">
+	<convert type="TemplatedMultiContent">
+	{"template": [
+		MultiContentEntryText(pos = (10, 2), size = (580, 25), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 2 is the Menu Titel
+			],
+	"fonts": [gFont("Regular", 20),gFont("Regular", 20)],
+	"itemHeight": 25
+	}
+			</convert>
+		</widget>
 	</screen>"""
 
 	def __init__(self, session):
@@ -1671,26 +1609,19 @@ class get_source(Screen):
 ######################################################################################
 class epgdna(ConfigListScreen, Screen):
 	skin = """
-<screen name="epgdna" position="center,225" size="1300,720" title="">
-<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/ntpmenu.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_blue" render="Label" position="990,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget name="config" position="20,75" size="820,410" font="Regular;28" itemHeight="35" enableWrapAround="1" scrollbarMode="showOnDemand" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x35.png" selectionPixmap="MX_HQ7/menu/button820x35.png" transparent="1"/>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
-<widget source="lastupdate" render="Label" position="100,500" zPosition="2" size="810,60" font="Regular;30" halign="center" valign="center"/>
+<screen name="epgdna" position="center,160" size="850,255" title="">
+  <widget position="15,10" size="820,175" name="config" scrollbarMode="showOnDemand" />
+  <ePixmap position="10,250" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+  <widget source="key_red" render="Label" position="10,220" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+  <ePixmap position="175,250" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+  <widget source="key_green" render="Label" position="175,220" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+  <ePixmap position="340,250" zPosition="1" size="200,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+  <widget source="key_yellow" render="Label" position="340,220" zPosition="2" size="200,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+   <ePixmap position="505,250" zPosition="1" size="200,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/blue.png" alphatest="blend" />
+  <widget source="key_blue" render="Label" position="505,220" zPosition="2" size="200,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+  <widget source="lastupdate" render="Label" position="20,193" zPosition="2" size="810,24" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="grey" transparent="1" />
+<eLabel position="30,187" size="790,2" backgroundColor="grey" />
+<ePixmap position="763,220" size="70,30" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/menu.png" zPosition="2" alphatest="blend" />
 </screen>"""
 
 	def __init__(self, session):
@@ -2342,31 +2273,25 @@ class AddRecord(ConfigListScreen, Screen):
 ######################################################################################
 class System2Screen(Screen):
 	skin = """
-		<screen name="System2Screen" position="center,225" size="1300,720" title="User Tools">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/usertools.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
-<convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (70, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3), 
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+		<screen name="System2Screen" position="center,160" size="750,370" title="System Tools 2">
+	<ePixmap position="20,358" zPosition="1" size="170,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<widget source="key_red" render="Label" position="20,328" zPosition="2" size="170,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<widget source="key_yellow" render="Label" position="370,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<ePixmap position="370,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+<widget source="key_green" render="Label" position="195,328" zPosition="2" size="175,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<ePixmap position="195,358" zPosition="1" size="175,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<widget source="menu" render="Listbox" position="15,10" size="710,300" scrollbarMode="showOnDemand">
+	<convert type="TemplatedMultiContent">
+	{"template": [
+		MultiContentEntryText(pos = (50, 2), size = (580, 25), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 2 is the Menu Titel
+		MultiContentEntryText(pos = (60, 29), size = (580, 18), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 3 is the Description
+		MultiContentEntryPixmapAlphaTest(pos = (5, 5), size = (100, 40), png = 3), # index 4 is the pixmap
+			],
+	"fonts": [gFont("Regular", 23),gFont("Regular", 16)],
+	"itemHeight": 50
+	}
+			</convert>
+		</widget>
 	</screen>"""
 
 	def __init__(self, session):
@@ -2400,8 +2325,12 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 		self.list = []
 		onepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//drop.png"))
 		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//ddns.png"))
+		trespng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//ddns.png"))
+		cuatropng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images//ddns.png"))
 		self.list.append((_("Liberar Memoria"), 1, _("Liberar Memoria ram del receptor"), onepng))
 		self.list.append((_("Editar DNS"), 2, _("Configuracion server DNS"), twopng))
+		self.list.append((_("Backup Completo"), 3, _("Configuracion server DNS"), trespng))
+		self.list.append((_("Mount Manager"), 4, _("Configuracion server DNS"), cuatropng))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
 		self["menu"].setList(self.list)
@@ -2441,30 +2370,26 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 				self.session.open(DropScreen)
 			elif item is 2:
 				self.session.open(DDNSScreen)
+			elif item is 3:
+				import ImageBackup
+				self.session.open(ImageBackup.ImageBackup)
+			elif item is 4:
+				import MountManager
+				self.session.open(MountManager.HddMount)
 			
 			else:
 				self.close(None)
 ######################################################################################
 class DDNSScreen(ConfigListScreen, Screen):
 	skin = """
-<screen name="DDNSScreen" position="center,225" size="1300,720" title="Dynamic DNS">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/ddnsmenu.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget name="config" position="20,20" size="820,3000" font="Regular;28" itemHeight="35" enableWrapAround="1" scrollbarMode="showOnDemand" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x35.png" selectionPixmap="MX_HQ7/menu/button820x35.png" transparent="1"/>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+<screen name="DDNSScreen" position="center,160" size="750,370" title="Dynamic DNS">
+	<widget position="15,10" size="720,200" name="config" scrollbarMode="showOnDemand" />
+	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<ePixmap position="340,358" zPosition="1" size="195,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+	<widget source="key_yellow" render="Label" position="340,328" zPosition="2" size="195,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
 	def __init__(self, session):
@@ -2549,27 +2474,14 @@ class DDNSScreen(ConfigListScreen, Screen):
 ######################################################################################
 class DropScreen(ConfigListScreen, Screen):
 	skin = """
-<screen name="DropScreen" position="center,225" size="1300,720" title="Cache Flush">
-	<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/dropmenu.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget name="config" position="20,20" size="820,3000" font="Regular;28" itemHeight="35" enableWrapAround="1" scrollbarMode="showOnDemand" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x35.png" selectionPixmap="MX_HQ7/menu/button820x35.png" transparent="1"/>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
-	<widget source="MemoryLabel" render="Label" position="55,435" size="150,22" font="Regular; 20" halign="right" foregroundColor="#aaaaaa" />
-	<widget source="memTotal" render="Label" position="220,435" zPosition="2" size="450,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-	<widget source="bufCache" render="Label" position="220,460" zPosition="2" size="450,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+<screen name="DDNSScreen" position="center,160" size="750,370" title="Dynamic DNS">
+	<widget position="15,10" size="720,200" name="config" scrollbarMode="showOnDemand" />
+	<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+	<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+	<ePixmap position="340,358" zPosition="1" size="195,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+	<widget source="key_yellow" render="Label" position="340,328" zPosition="2" size="195,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
 	def __init__(self, session):

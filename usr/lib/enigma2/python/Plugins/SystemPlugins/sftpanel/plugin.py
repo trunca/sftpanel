@@ -78,34 +78,27 @@ config.plugins.sftpanel.userdir = ConfigText(default="/ipk/", visible_width = 70
 ######################################################################################
 class extrapanel(Screen):
 	skin = """
-<screen name="extrapanel" position="center,225" size="1300,720" title="Extra Panel">
-<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/mainnsft.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_yellow" render="Label" position="690,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="key_blue" render="Label" position="990,640" size="240,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget source="menu" render="Listbox" enableWrapAround="1" position="20,20" size="820,605" zPosition="1" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x55.png" selectionPixmap="MX_HQ7/menu/sel820x55.png" scrollbarMode="showNever" transparent="1">
+<screen name="extrapanel" position="center,160" size="750,420" title="Extra Panel">
+<ePixmap position="10,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+<widget source="key_red" render="Label" position="10,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+<ePixmap position="175,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+<widget source="key_green" render="Label" position="175,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+<ePixmap position="340,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+<widget source="key_yellow" render="Label" position="340,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+<ePixmap position="505,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/blue.png" alphatest="blend" />
+<widget source="key_blue" render="Label" position="505,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+<widget source="menu" render="Listbox" position="15,10" size="720,350" scrollbarMode="showOnDemand">
 <convert type="TemplatedMultiContent">
-{"template": [ MultiContentEntryText(pos = (70, 9), size = (710, 35), flags = RT_HALIGN_LEFT, text =0),
-MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3), 
-],
-"fonts": [gFont("Regular",34)],
-"itemHeight":55
-}
-</convert>
-</widget>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+	{"template": [
+		MultiContentEntryText(pos = (50, 2), size = (600, 25), font=0, flags = RT_HALIGN_LEFT, text = 0), # index 2 is the Menu Titel
+		MultiContentEntryText(pos = (60, 29), size = (600, 18), font=1, flags = RT_HALIGN_LEFT, text = 2), # index 3 is the Description
+		MultiContentEntryPixmapAlphaTest(pos = (5, 5), size = (100, 40), png = 3), # index 4 is the pixmap
+			],
+	"fonts": [gFont("Regular", 23),gFont("Regular", 16)],
+	"itemHeight": 50
+	}
+	</convert>
+		</widget>
 </screen>"""
 
 	def __init__(self, session):
@@ -141,13 +134,13 @@ MultiContentEntryPixmapAlphaTest(pos = (10, 7), size = (40, 40), png = 3),
 
 	def mList(self):
 		self.list = []
-		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/tools.png"))
-		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/install.png"))
-		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/epp2.png"))
-		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/system.png"))
-		sevenpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/addon.png"))
-		eightpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/system2.png"))
-		sietepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/multimediapanel.png"))
+		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/tools.png"))
+		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/install.png"))
+		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/epp2.png"))
+		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/system.png"))
+		sevenpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/addon.png"))
+		eightpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/system2.png"))
+		sietepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/multimediapanel.png"))
 		self.list.append((_("Utilidades de Servicio"), 2, _("Gestion EPG, NTP, ejecucion script...."), twopng ))
 		self.list.append((_("Utilidades de Sistema"), 3, _("Gestion modulos Kernel, memoria swpa, Samba, utilidades usb"), sixpng ))
 		self.list.append((_("Utilidades de Usuario"), 4, _("Liberador memoria, gestion cuenta Dns, utilidades password"), eightpng ))
@@ -605,23 +598,12 @@ class sftpanelinfo(Screen):
 ######################################################################################
 class ConfigExtentions2(ConfigListScreen, Screen):
 	skin = """
-<screen name="ConfigExtentions2" position="center,225" size="1300,720" title="sft-panel Menu/Extensionmenu config">
-		<ePixmap pixmap="MX_HQ7/menu/bb.png" position="18,638" size="1264,74" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/menuconficam.png" position="945,160" size="250,250" zPosition="-1" alphatest="on"/>
-<ePixmap pixmap="MX_HQ7/menu/exitred.png" position="1212,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/green48x48.png" position="330,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/yellow48x48.png" position="630,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/buttons/blue48x48.png" position="930,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow1.png" position="40,650" size="48,48" alphatest="blend"/>
-<ePixmap pixmap="MX_HQ7/menu/arrow_h.png" position="120,650" size="48,48" alphatest="blend"/>
-<widget source="key_green" render="Label" position="390,640" size="250,70" zPosition="1" font="Regular;28" halign="left" valign="center" foregroundColor="button" backgroundColor="bgkey" transparent="1"/>
-<widget name="config" position="20,20" size="820,570" font="Regular;28" itemHeight="35" enableWrapAround="1" scrollbarMode="showOnDemand" foregroundColor="button" backgroundColor="bgbutton" backgroundColorSelected="selbutton" backgroundPixmap="MX_HQ7/menu/bg820x35.png" selectionPixmap="MX_HQ7/menu/button820x35.png" transparent="1"/>
-<widget source="global.CurrentTime" render="Label" position="840,50" size="460,70" font="Regular;65" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ClockToText">Default</convert>
-</widget>
-<widget source="session.CurrentService" render="Label" position="850,480" size="440,100" font="Regular;38" halign="center" foregroundColor="info" backgroundColor="bgmain" transparent="1">
-<convert type="ServiceName">Name</convert>
-</widget>
+<screen name="ConfigExtentions2" position="center,160" size="750,370" title="sft-panel Menu/Extensionmenu config">
+		<widget position="15,10" size="720,300" name="config" scrollbarMode="showOnDemand" />
+		<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+		<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
+		<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+		<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
 	def __init__(self, session):
