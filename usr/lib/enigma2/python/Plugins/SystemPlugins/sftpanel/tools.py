@@ -1288,7 +1288,8 @@ class SystemScreen(Screen):
 			elif item is 2:
 				self.session.open(ServiceMan)
 			elif item is 3:
-				self.session.open(CrontabMan)
+				import sfcron
+				self.session.open(sfcron.CronManager)
 			elif item is 4:
 				self.session.open(SwapScreen2)
 			elif item is 5:
