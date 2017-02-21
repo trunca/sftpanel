@@ -1,0 +1,6 @@
+http://www.vuplus-community.net/rytec/italy/epg.dat.gz
+http://feed-sfteam.ddns.net/feeds/epg/epg.dat.gz
+http://appstore.open-plus.es/epg/epg.dat.gz
+http://www.vuplus-community.net/rytec/dplus/epg.dat.gz
+http://www.vuplus-community.net/rytec/csat/epg.dat.gz
+
