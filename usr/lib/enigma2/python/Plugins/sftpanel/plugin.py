@@ -79,13 +79,13 @@ config.plugins.sftpanel.userdir = ConfigText(default="/ipk/", visible_width = 70
 class extrapanel(Screen):
 	skin = """
 <screen name="extrapanel" position="center,160" size="750,420" title="Extra Panel">
-<ePixmap position="10,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+<ePixmap position="10,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/red.png" alphatest="blend" />
 <widget source="key_red" render="Label" position="10,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-<ePixmap position="175,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+<ePixmap position="175,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/green.png" alphatest="blend" />
 <widget source="key_green" render="Label" position="175,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-<ePixmap position="340,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/yellow.png" alphatest="blend" />
+<ePixmap position="340,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/yellow.png" alphatest="blend" />
 <widget source="key_yellow" render="Label" position="340,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-<ePixmap position="505,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/blue.png" alphatest="blend" />
+<ePixmap position="505,408" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/blue.png" alphatest="blend" />
 <widget source="key_blue" render="Label" position="505,378" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 <widget source="menu" render="Listbox" position="15,10" size="720,350" scrollbarMode="showOnDemand">
 <convert type="TemplatedMultiContent">
@@ -104,7 +104,7 @@ class extrapanel(Screen):
 	def __init__(self, session):
 		self.session = session
 		Screen.__init__(self, session)
-		self.setTitle(_("sft-panel"))
+		self.setTitle(_("Utilidades SFT"))
 		self.iConsole = iConsole()
 		self.indexpos = None
 		self["shortcuts"] = NumberActionMap(["ShortcutActions", "WizardActions", "EPGSelectActions", "NumberActions"],
@@ -134,19 +134,17 @@ class extrapanel(Screen):
 
 	def mList(self):
 		self.list = []
-		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/tools.png"))
-		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/install.png"))
-		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/epp2.png"))
-		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/system.png"))
-		sevenpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/addon.png"))
-		eightpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/system2.png"))
-		sietepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "SystemPlugins/sftpanel/images/multimediapanel.png"))
+		twopng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/tools.png"))
+		treepng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/install.png"))
+		fourpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/epp2.png"))
+		sixpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/system.png"))
+		sevenpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/addon.png"))
+		eightpng = LoadPixmap(cached=True, path=resolveFilename(SCOPE_PLUGINS, "sftpanel/images/system2.png"))
 		self.list.append((_("Utilidades de Servicio"), 2, _("Gestion EPG, NTP, ejecucion script...."), twopng ))
 		self.list.append((_("Utilidades de Sistema"), 3, _("Gestion modulos Kernel, memoria swpa, Samba, utilidades usb"), sixpng ))
 		self.list.append((_("Utilidades de Usuario"), 4, _("Liberador memoria, gestion cuenta Dns, utilidades password"), eightpng ))
 		self.list.append((_("Instalar Paquetes"), 5, _("Gestion de instalacion de paquetes"), treepng))
 		self.list.append((_("Acceso a Plugin"), 6, _("Gestion de plugins, instalacion y desistalacion"), sevenpng))
-		self.list.append((_("Multimedia"), 7, _("Utilidades multimedia, streaming..."), sietepng))
 		self.list.append((_("Panel Configuracion"), 8, _("Configuracion opciones Panel"), fourpng))
 		if self.indexpos != None:
 			self["menu"].setIndex(self.indexpos)
@@ -180,8 +178,6 @@ class extrapanel(Screen):
 				main(self.session)
 			elif item is 6:
 				self.session.open(PluginBrowser)
-			elif item is 7:
-				self.session.open(tools.multimedia)
 			elif item is 8:
 				self.session.open(ConfigExtentions2)
 			else:
@@ -205,7 +201,7 @@ class extrapanel(Screen):
 class sftpanelinfo(Screen):
 	skin = """
 <screen name="sftpanelinfo" position="340,74" size="620,617" title="sft-panel">
-	<ePixmap position="20,612" zPosition="1" size="180,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+	<ePixmap position="20,612" zPosition="1" size="180,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/red.png" alphatest="blend" />
 	<widget source="CPULabel" render="Label" position="20,29" zPosition="2" size="180,22" font="Regular;20" halign="right" valign="center" backgroundColor="background" foregroundColor="#aaaaaa" transparent="1" />
 	<widget source="CPU" render="Label" position="210,29" zPosition="2" size="390,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="key_red" render="Label" position="20,582" zPosition="2" size="180,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
@@ -242,7 +238,7 @@ class sftpanelinfo(Screen):
 	<eLabel position="30,443" size="560,2" backgroundColor="#aaaaaa" />
 	<eLabel position="30,523" size="560,2" backgroundColor="#aaaaaa" />
 	<eLabel position="230,558" size="320,2" backgroundColor="#aaaaaa" />
-	<ePixmap position="20,531" size="180,47" zPosition="1" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/sfpanelinfo.png" alphatest="blend" />
+	<ePixmap position="20,531" size="180,47" zPosition="1" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/sfpanelinfo.png" alphatest="blend" />
 	<widget source="panelver" render="Label" position="490,531" zPosition="2" size="100,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 	<widget source="plipanel" render="Label" position="235,531" zPosition="2" size="250,22" font="Regular;20" halign="right" valign="center" backgroundColor="background" foregroundColor="#aaaaaa" transparent="1" />
 	<widget source="cardserver" render="Label" position="370,590" zPosition="2" size="225,22" font="Regular;20" halign="left" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
@@ -600,9 +596,9 @@ class ConfigExtentions2(ConfigListScreen, Screen):
 	skin = """
 <screen name="ConfigExtentions2" position="center,160" size="750,370" title="sft-panel Menu/Extensionmenu config">
 		<widget position="15,10" size="720,300" name="config" scrollbarMode="showOnDemand" />
-		<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/red.png" alphatest="blend" />
+		<ePixmap position="10,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/red.png" alphatest="blend" />
 		<widget source="key_red" render="Label" position="10,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
-		<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/SystemPlugins/sftpanel/images/green.png" alphatest="blend" />
+		<ePixmap position="175,358" zPosition="1" size="165,2" pixmap="/usr/lib/enigma2/python/Plugins/sftpanel/images/green.png" alphatest="blend" />
 		<widget source="key_green" render="Label" position="175,328" zPosition="2" size="165,30" font="Regular;20" halign="center" valign="center" backgroundColor="background" foregroundColor="foreground" transparent="1" />
 </screen>"""
 
